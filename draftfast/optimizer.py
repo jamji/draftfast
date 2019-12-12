@@ -103,6 +103,7 @@ class Optimizer(object):
         self._set_combo()
         self._set_no_duplicate_lineups()
         self._set_min_teams()
+        self._set_max_players_per_team()
 
         if self.offensive_positions and self.defensive_positions \
                 and self.settings.no_offense_against_defense or \
@@ -308,3 +309,11 @@ class Optimizer(object):
             self.solver.Add(
                 self.solver.Sum(teams) >= self.settings.min_teams
             )
+
+    def _set_max_players_per_team(self):
+        for team in self.teams:
+            if team:
+                team_cap = self.solver.Constraint(0, 4)
+                for i, player in self.enumerated_players:
+                    if team == player.team:
+                        team_cap.SetCoefficient(self.variables[i], 1)
