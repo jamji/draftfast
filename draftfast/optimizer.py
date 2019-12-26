@@ -104,6 +104,7 @@ class Optimizer(object):
         self._set_no_duplicate_lineups()
         self._set_min_teams()
         self._set_max_players_per_team()
+        self._set_po_settings()
 
         if self.offensive_positions and self.defensive_positions \
                 and self.settings.no_offense_against_defense or \
@@ -317,3 +318,15 @@ class Optimizer(object):
                 for i, player in self.enumerated_players:
                     if team == player.team:
                         team_cap.SetCoefficient(self.variables[i], 1)
+
+    def _set_po_settings(self):
+        for po_setting in self.settings.lineup_settings:
+            player_lower_bound = po_setting['playerCount']
+            po_upper_bound = po_setting['poUpperBound']
+            po_cap = self.solver.Constraint(player_lower_bound, self.roster_size)
+            for i, player in self.enumerated_players:
+                if player.po < po_upper_bound:
+                    po_cap.SetCoefficient(
+                        self.variables[i],
+                        1
+                    )

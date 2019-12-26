@@ -50,6 +50,7 @@ class OptimizerSettings(object):
                  no_offense_against_defense=False,
                  no_defense_against_captain=False,
                  showdown_teams=None,
+                 lineup_settings=None,
                  min_teams=2):
         self.stacks = stacks
         self.existing_rosters = existing_rosters or []
@@ -59,6 +60,7 @@ class OptimizerSettings(object):
         self.no_offense_against_defense = no_offense_against_defense
         self.no_defense_against_captain = no_defense_against_captain
         self.showdown_teams = showdown_teams
+        self.lineup_settings = lineup_settings or []
         self.min_teams = min_teams
 
     # TODO: format this like a proper repr(), i.e. <OptimizerSettings: ...>
@@ -82,6 +84,9 @@ class OptimizerSettings(object):
                     self.no_offense_against_defense
                 )
             )
+
+        if self.lineup_settings:
+            lines.append('Custom Lineup Settings: {}'.format(self.lineup_settings))
 
         if len(lines):
             return '\n'.join(lines)
