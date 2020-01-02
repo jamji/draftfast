@@ -277,11 +277,11 @@ class Optimizer(object):
 
     def _set_no_duplicate_lineups(self):
         for roster in self.existing_rosters:
-            max_repeats = self.roster_size - 1
+            max_repeats = self.roster_size
             if self.settings.uniques:
                 max_repeats = max(
                     self.roster_size - self.settings.uniques,
-                    1
+                    0
                 )
             repeated_players = self.solver.Constraint(
                 0,
