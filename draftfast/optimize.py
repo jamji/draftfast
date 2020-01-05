@@ -99,6 +99,7 @@ def run_multi(
     verbose=False,
     exposure_bounds: List[dict] = list(),
     exposure_random_seed=None,
+    progress_recorder=None,
 ) -> [List[Roster], list]:
 
     if not isinstance(rule_set, RuleSet):
@@ -108,7 +109,8 @@ def run_multi(
     random.seed(exposure_random_seed)
 
     rosters = []
-    for _ in range(0, iterations):
+    for idx in range(0, iterations):
+        progress_recorder.set_progress(idx, iterations)
         exposure_dict = get_exposure_args(
             existing_rosters=optimizer_settings.existing_rosters,
             exposure_bounds=exposure_bounds,
