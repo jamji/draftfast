@@ -60,7 +60,7 @@ def get_exposure_args_deterministic(exposures, existing_rosters,
 
         total = float(len(existing_rosters) + 1)
         min_lines = bound['min'] * total
-        max_lines = math.floor(bound['max'] * total)
+        max_lines = math.floor(bound['max'] * total) or 1
         lineups = exposures.get(name, 0)
 
         if lineups < min_lines:
