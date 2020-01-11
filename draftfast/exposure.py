@@ -1,11 +1,20 @@
 import math
 import csv
+import operator
 import random
 from collections import OrderedDict
 from terminaltables import AsciiTable
 import numpy as np
 
 # TODO encapsulate this into an object
+
+MAX_FD_LOCKED_POSITIONS = {
+    'PG': 2,
+    'SG': 2,
+    'SF': 2,
+    'PF': 2,
+    'C': 1,
+}
 
 
 def parse_exposure_file(file_location):
@@ -54,6 +63,15 @@ def get_exposure_args_deterministic(exposures, existing_rosters,
                                     exposure_bounds) -> dict:
     banned = []
     locked = []
+    locked_pos = {
+        'PG': 0,
+        'SG': 0,
+        'SF': 0,
+        'PF': 0,
+        'C': 0,
+    }
+
+    exposure_bounds.sort(key=operator.itemgetter('proj'), reverse=True)
 
     for bound in exposure_bounds:
         name = bound['name']
@@ -64,8 +82,29 @@ def get_exposure_args_deterministic(exposures, existing_rosters,
         lineups = exposures.get(name, 0)
 
         if lineups < min_lines:
-            # TODO - downsize locked so solution is not impossible
-            locked.append(name)
+            if type(bound['position']) is str and\
+                    locked_pos[bound['position']] < MAX_FD_LOCKED_POSITIONS[bound['position']]:
+                locked_pos[bound['position']] += 1
+                locked.append(name)
+            if type(bound['position']) is list:
+                for pos in bound['position']:
+                    if sum(locked_pos.values()) >= 8:
+                        break
+                    if pos == 'PG' and locked_pos['PG'] < 3 and locked_pos['PG'] + locked_pos['SG'] < 4:
+                        locked_pos['PG'] += 1
+                        locked.append(name)
+                    elif pos == 'SG' and locked_pos['SG'] < 3 and locked_pos['PG'] + locked_pos['SG'] < 4:
+                        locked_pos['SG'] += 1
+                        locked.append(name)
+                    elif pos == 'SF' and locked_pos['SF'] < 3 and locked_pos['SF'] + locked_pos['PF'] < 4:
+                        locked_pos['SF'] += 1
+                        locked.append(name)
+                    elif pos == 'PF' and locked_pos['PF'] < 3 and locked_pos['SF'] + locked_pos['PF'] < 4:
+                        locked_pos['PF'] += 1
+                        locked.append(name)
+                    elif pos == 'C' and locked_pos['C'] < 2:
+                        locked_pos['C'] += 1
+                        locked.append(name)
         elif lineups >= max_lines:
             banned.append(name)
 
