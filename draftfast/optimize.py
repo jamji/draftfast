@@ -100,6 +100,7 @@ def run_multi(
     exposure_bounds: List[dict] = list(),
     exposure_random_seed=None,
     progress_recorder=None,
+    locked_pos=None,
 ) -> [List[Roster], list]:
 
     if not isinstance(rule_set, RuleSet):
@@ -117,6 +118,7 @@ def run_multi(
             n=iterations,
             use_random=bool(exposure_random_seed),
             random_seed=exposure_random_seed,
+            locked_pos=locked_pos,
         )
 
         roster = run(

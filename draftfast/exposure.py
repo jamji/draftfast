@@ -45,7 +45,7 @@ def parse_exposure_file(file_location):
 
 
 def get_exposure_args(existing_rosters, exposure_bounds, n, use_random,
-                      random_seed) -> dict:
+                      random_seed, locked_pos) -> dict:
     exposures = {}
     for r in existing_rosters:
         for p in r.players:
@@ -56,20 +56,13 @@ def get_exposure_args(existing_rosters, exposure_bounds, n, use_random,
                                         random_seed)
 
     return get_exposure_args_deterministic(exposures, existing_rosters,
-                                           exposure_bounds)
+                                           exposure_bounds, locked_pos)
 
 
 def get_exposure_args_deterministic(exposures, existing_rosters,
-                                    exposure_bounds) -> dict:
+                                    exposure_bounds, locked_pos) -> dict:
     banned = []
     locked = []
-    locked_pos = {
-        'PG': 0,
-        'SG': 0,
-        'SF': 0,
-        'PF': 0,
-        'C': 0,
-    }
 
     exposure_bounds.sort(key=operator.itemgetter('proj'), reverse=True)
 
