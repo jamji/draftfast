@@ -45,7 +45,7 @@ def parse_exposure_file(file_location):
 
 
 def get_exposure_args(existing_rosters, exposure_bounds, n, use_random,
-                      random_seed, locked_pos) -> dict:
+                      random_seed, locked_pos, constraints) -> dict:
     exposures = {}
     for r in existing_rosters:
         for p in r.players:
@@ -56,11 +56,11 @@ def get_exposure_args(existing_rosters, exposure_bounds, n, use_random,
                                         random_seed)
 
     return get_exposure_args_deterministic(exposures, existing_rosters,
-                                           exposure_bounds, locked_pos)
+                                           exposure_bounds, locked_pos, constraints)
 
 
 def get_exposure_args_deterministic(exposures, existing_rosters,
-                                    exposure_bounds, locked_pos) -> dict:
+                                    exposure_bounds, locked_pos, constraints) -> dict:
     banned = []
     locked = []
 
@@ -76,29 +76,34 @@ def get_exposure_args_deterministic(exposures, existing_rosters,
 
         if lineups < min_lines:
             if type(bound['position']) is str and\
-                    locked_pos[bound['position']] < MAX_FD_LOCKED_POSITIONS[bound['position']]:
+                    locked_pos[bound['position']] < MAX_FD_LOCKED_POSITIONS[bound['position']] and\
+                    not constraints.is_banned(name):
                 locked_pos[bound['position']] += 1
                 locked.append(name)
             if type(bound['position']) is list:
                 for pos in bound['position']:
                     if sum(locked_pos.values()) >= 8:
                         break
-                    if pos == 'PG' and locked_pos['PG'] < 3 and locked_pos['PG'] + locked_pos['SG'] < 4:
+                    if pos == 'PG' and locked_pos['PG'] < 3 and locked_pos['PG'] + locked_pos['SG'] < 4 and\
+                            not constraints.is_banned(name):
                         locked_pos['PG'] += 1
                         locked.append(name)
-                    elif pos == 'SG' and locked_pos['SG'] < 3 and locked_pos['PG'] + locked_pos['SG'] < 4:
+                    elif pos == 'SG' and locked_pos['SG'] < 3 and locked_pos['PG'] + locked_pos['SG'] < 4 and\
+                            not constraints.is_banned(name):
                         locked_pos['SG'] += 1
                         locked.append(name)
-                    elif pos == 'SF' and locked_pos['SF'] < 3 and locked_pos['SF'] + locked_pos['PF'] < 4:
+                    elif pos == 'SF' and locked_pos['SF'] < 3 and locked_pos['SF'] + locked_pos['PF'] < 4 and\
+                            not constraints.is_banned(name):
                         locked_pos['SF'] += 1
                         locked.append(name)
-                    elif pos == 'PF' and locked_pos['PF'] < 3 and locked_pos['SF'] + locked_pos['PF'] < 4:
+                    elif pos == 'PF' and locked_pos['PF'] < 3 and locked_pos['SF'] + locked_pos['PF'] < 4 and\
+                            not constraints.is_banned(name):
                         locked_pos['PF'] += 1
                         locked.append(name)
-                    elif pos == 'C' and locked_pos['C'] < 2:
+                    elif pos == 'C' and locked_pos['C'] < 2 and not constraints.is_banned(name):
                         locked_pos['C'] += 1
                         locked.append(name)
-        elif lineups >= max_lines:
+        elif lineups >= max_lines and not constraints.is_locked(name):
             banned.append(name)
 
     return {

@@ -119,6 +119,7 @@ def run_multi(
             use_random=bool(exposure_random_seed),
             random_seed=exposure_random_seed,
             locked_pos=locked_pos,
+            constraints=constraints,
         )
 
         roster = run(
