@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import List
 from ortools.linear_solver import pywraplp
 from draftfast.settings import OptimizerSettings
@@ -37,11 +38,10 @@ class Optimizer(object):
         self.banned_for_exposure = exposure_dict.get('banned', [])
         self.locked_for_exposure = exposure_dict.get('locked', [])
 
-        self.player_to_idx_map = {}
         self.name_to_idx_map = {}
         self.variables = []
         self.name_to_idx_map = dict()
-        self.player_to_idx_map = dict()
+        self.player_to_idx_map = defaultdict(list)
 
         for idx, player in self.enumerated_players:
             self.variables.append(
@@ -69,7 +69,7 @@ class Optimizer(object):
         self.objective.SetMaximization()
 
     def _add_player_to_idx_maps(self, p: Player, idx: int):
-        self.player_to_idx_map[p.solver_id] = idx
+        self.player_to_idx_map[p.solver_id.split('-')[0]].append(idx)
 
         if p.name not in self.name_to_idx_map.keys():
             self.name_to_idx_map[p.name] = set()
@@ -288,9 +288,10 @@ class Optimizer(object):
                 max_repeats
             )
             for player in roster.sorted_players():
-                i = self.player_to_idx_map.get(player.solver_id)
-                if i is not None:
-                    repeated_players.SetCoefficient(self.variables[i], 1)
+                indexes = self.player_to_idx_map.get(player.solver_id.split('-')[0])
+                if indexes is not None:
+                    for i in indexes:
+                        repeated_players.SetCoefficient(self.variables[i], 1)
 
     def _set_min_teams(self):
         teams = []

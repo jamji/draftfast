@@ -142,6 +142,34 @@ class NBARoster(Roster):
         'C': 4
     }
 
+    def __eq__(self, roster):
+        if not roster:
+            return False
+
+        player_set_a = set(a.solver_id.split('-')[0] for a in self.players)
+        player_set_b = set(b.solver_id.split('-')[0] for b in roster.players)
+        return player_set_a == player_set_b
+
+    def __contains__(self, player):
+        if isinstance(player, str):
+            for p in self.players:
+                if p.name == player or p.short_name == player:
+                    return True
+        elif isinstance(player, Player):
+            return player in self.players
+        else:
+            raise NotImplementedError
+
+        return False
+
+    def exact_equal(self, roster):
+        if not roster:
+            return False
+
+        player_set_a = [a.solver_id for a in self.sorted_players()]
+        player_set_b = [b.solver_id for b in roster.sorted_players()]
+        return player_set_a == player_set_b
+
 
 class WNBARoster(Roster):
     POSITION_ORDER = {
