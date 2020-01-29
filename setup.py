@@ -6,7 +6,7 @@ with open('README.md', 'r') as fh:
 requires = [
     'numpy==1.15.4',
     'terminaltables==3.1.0',
-    'ortools==7.3.7083',
+    'ortools==7.5.7466',
 ]
 
 setuptools.setup(
