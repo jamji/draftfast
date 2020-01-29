@@ -108,6 +108,19 @@ class ShowdownRoster(Roster):
     }
 
 
+class SingleGameRoster(Roster):
+    POSITION_ORDER = {
+        'MVP': 0,
+        'STAR': 1,
+        'PRO': 2,
+        'UTIL': 3,
+    }
+
+    def position_order(self, player):
+        position_order = getattr(self, 'POSITION_ORDER')
+        return position_order[player.pos]
+
+
 class NFLRoster(Roster):
     POSITION_ORDER = {
         'QB': 0,
@@ -224,6 +237,7 @@ class RosterSelect:
         roster_dict = {
             'NBA': NBARoster(),
             'NBA_SHOWDOWN': ShowdownRoster(),
+            'NBA_SINGLE_GAME': SingleGameRoster(),
             'WNBA': WNBARoster(),
             'NFL': NFLRoster(),
             'NFL_SHOWDOWN': ShowdownRoster(),

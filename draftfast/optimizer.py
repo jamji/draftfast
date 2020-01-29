@@ -33,6 +33,7 @@ class Optimizer(object):
         self.defensive_positions = rule_set.defensive_positions
         self.general_position_limits = rule_set.general_position_limits
         self.showdown = rule_set.game_type == 'showdown'
+        self.single = rule_set.game_type == 'single'
         self.settings = settings
         self.lineup_constraints = lineup_constraints
         self.banned_for_exposure = exposure_dict.get('banned', [])
@@ -41,7 +42,10 @@ class Optimizer(object):
         self.name_to_idx_map = {}
         self.variables = []
         self.name_to_idx_map = dict()
-        self.player_to_idx_map = defaultdict(list)
+        if self.single:
+            self.player_to_idx_map = dict()
+        else:
+            self.player_to_idx_map = defaultdict(list)
 
         for idx, player in self.enumerated_players:
             self.variables.append(
@@ -65,11 +69,15 @@ class Optimizer(object):
                 raise PlayerBanAndLockException(player.name)
 
         self.teams = set([p.team for p in self.players])
+        self.names = set([p.name for p in self.players])
         self.objective = self.solver.Objective()
         self.objective.SetMaximization()
 
     def _add_player_to_idx_maps(self, p: Player, idx: int):
-        self.player_to_idx_map[p.solver_id.split('-')[0]].append(idx)
+        if self.single:
+            self.player_to_idx_map[p.solver_id] = idx
+        else:
+            self.player_to_idx_map[p.solver_id.split('-')[0]].append(idx)
 
         if p.name not in self.name_to_idx_map.keys():
             self.name_to_idx_map[p.name] = set()
@@ -105,6 +113,9 @@ class Optimizer(object):
         self._set_min_teams()
         self._set_max_players_per_team()
         self._set_po_settings()
+
+        if self.single:
+            self._set_no_duplicate_players()
 
         if self.offensive_positions and self.defensive_positions \
                 and self.settings.no_offense_against_defense or \
@@ -288,10 +299,15 @@ class Optimizer(object):
                 max_repeats
             )
             for player in roster.sorted_players():
-                indexes = self.player_to_idx_map.get(player.solver_id.split('-')[0])
-                if indexes is not None:
-                    for i in indexes:
+                if self.single:
+                    i = self.player_to_idx_map.get(player.solver_id)
+                    if i is not None:
                         repeated_players.SetCoefficient(self.variables[i], 1)
+                else:
+                    indexes = self.player_to_idx_map.get(player.solver_id.split('-')[0])
+                    if indexes is not None:
+                        for i in indexes:
+                            repeated_players.SetCoefficient(self.variables[i], 1)
 
     def _set_min_teams(self):
         teams = []
@@ -312,10 +328,20 @@ class Optimizer(object):
                 self.solver.Sum(teams) >= self.settings.min_teams
             )
 
+    def _set_no_duplicate_players(self):
+        """Single game, a player will be 4 variable"""
+        for name in self.names:
+            name_var = self.solver.IntVar(0, 1, name)
+            players_on_name = [self.variables[i] for i, p in self.enumerated_players if p.name == name]
+            self.solver.Add(self.solver.Sum(players_on_name) <= name_var)
+
     def _set_max_players_per_team(self):
         for team in self.teams:
             if team:
-                team_cap = self.solver.Constraint(0, 4)
+                if self.single:
+                    team_cap = self.solver.Constraint(1, 4)
+                else:
+                    team_cap = self.solver.Constraint(0, 4)
                 for i, player in self.enumerated_players:
                     if team == player.team:
                         team_cap.SetCoefficient(self.variables[i], 1)

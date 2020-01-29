@@ -20,6 +20,7 @@ ROSTER_SIZE = {
         'NFL': 9,
         'NFL_MVP': 5,
         'NBA': 9,
+        'NBA_SINGLE_GAME': 5,
         'MLB': 9,
         'WNBA': 7,
         'NASCAR': 5,
@@ -46,6 +47,7 @@ SALARY_CAP = {
         'NFL': 60_000,
         'NFL_MVP': 60_000,
         'NBA': 60_000,
+        'NBA_SINGLE_GAME': 60_000,
         'MLB': 35_000,
         'WNBA': 40_000,
         'NASCAR': 50_000,
@@ -146,6 +148,12 @@ POSITIONS = {
             ['PF', 2, 2],
             ['C', 1, 1],
         ],
+        'NBA_SINGLE_GAME': [
+            ['MVP', 1, 1],
+            ['STAR', 1, 1],
+            ['PRO', 1, 1],
+            ['UTIL', 2, 2],
+        ],
         'MLB': [
             ['P', 1, 1],
             ['1B', 1, 2],  # TODO - allow C or 1B
@@ -226,6 +234,16 @@ FD_NBA_RULE_SET = RuleSet(
     salary_max=SALARY_CAP[FAN_DUEL]['NBA'],
     position_limits=POSITIONS[FAN_DUEL]['NBA'],
     general_position_limits=NBA_GENERAL_POSITIONS,
+)
+
+FD_NBA_SINGLE_GAME_RULE_SET = RuleSet(
+    site=FAN_DUEL,
+    league='NBA_SINGLE_GAME',
+    roster_size=ROSTER_SIZE[FAN_DUEL]['NBA_SINGLE_GAME'],
+    salary_max=SALARY_CAP[FAN_DUEL]['NBA_SINGLE_GAME'],
+    position_limits=POSITIONS[FAN_DUEL]['NBA_SINGLE_GAME'],
+    general_position_limits=[],
+    game_type='single',
 )
 
 DK_WNBA_RULE_SET = RuleSet(
