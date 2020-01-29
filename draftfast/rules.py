@@ -1,6 +1,6 @@
 DRAFT_KINGS = 'DRAFT_KINGS'
 FAN_DUEL = 'FAN_DUEL'
-
+FAN_TEAM = 'FAN_TEAM'
 
 ROSTER_SIZE = {
     DRAFT_KINGS: {
@@ -25,6 +25,11 @@ ROSTER_SIZE = {
         'WNBA': 7,
         'NASCAR': 5,
         'PGA': 6,
+    },
+    FAN_TEAM: {
+        'NBA': 7,
+        'NBA_FF': 5,
+        'SOCCER': 11
     }
 }
 
@@ -52,6 +57,13 @@ SALARY_CAP = {
         'WNBA': 40_000,
         'NASCAR': 50_000,
         'PGA': 60_000,
+    },
+    FAN_TEAM: {
+        'NBA_75': 75_000,
+        'NBA_70': 70_000,
+        'NBA_FF_45': 45_000,
+        'NBA_FF_40': 40_000,
+        'SOCCER': 100_000,
     }
 }
 
@@ -174,6 +186,28 @@ POSITIONS = {
         'PGA': [
             ['G', 6, 6],
         ],
+    },
+    FAN_TEAM: {
+    'NBA': [
+            ['PG', 1, 3],
+            ['SG', 1, 3],
+            ['SF', 1, 3],
+            ['PF', 1, 3],
+            ['C', 1, 3]
+        ],
+    'NBA_FF': [
+            ['PG', 0, 5],
+            ['SG', 0, 5],
+            ['SF', 0, 5],
+            ['PF', 0, 5],
+            ['C', 0, 5]
+        ],
+    'SOCCER': [
+            ['GK', 1, 1],
+            ['D', 1, 5],
+            ['M', 1, 5],
+            ['F', 1, 3],
+    ]
     }
 }
 
@@ -406,4 +440,49 @@ DK_MLB_SHOWDOWN_RULE_SET = RuleSet(
     position_limits=POSITIONS[DRAFT_KINGS]['MLB_SHOWDOWN'],
     general_position_limits=[],
     game_type='showdown'
+)
+
+FT_NBA_75_RULE_SET = RuleSet(
+    site=FAN_TEAM, 
+    league='NBA', 
+    roster_size=ROSTER_SIZE[FAN_TEAM]['NBA'], 
+    position_limits=POSITIONS[FAN_TEAM]['NBA'], 
+    salary_max=SALARY_CAP[FAN_TEAM]['NBA_75'],
+    general_position_limits = []
+)
+
+FT_NBA_70_RULE_SET = RuleSet(
+    site=FAN_TEAM, 
+    league='NBA', 
+    roster_size=ROSTER_SIZE[FAN_TEAM]['NBA'], 
+    position_limits=POSITIONS[FAN_TEAM]['NBA'], 
+    salary_max=SALARY_CAP[FAN_TEAM]['NBA_70'],
+    general_position_limits = []
+)
+
+FT_NBA_FF_45_RULE_SET = RuleSet(
+    site=FAN_TEAM, 
+    league='NBA', 
+    roster_size=ROSTER_SIZE[FAN_TEAM]['NBA_FF'], 
+    position_limits=POSITIONS[FAN_TEAM]['NBA_FF'], 
+    salary_max=SALARY_CAP[FAN_TEAM]['NBA_FF_45'],
+    general_position_limits = []
+)
+
+FT_NBA_FF_40_RULE_SET = RuleSet(
+    site=FAN_TEAM, 
+    league='NBA', 
+    roster_size=ROSTER_SIZE[FAN_TEAM]['NBA_FF'], 
+    position_limits=POSITIONS[FAN_TEAM]['NBA_FF'], 
+    salary_max=SALARY_CAP[FAN_TEAM]['NBA_FF_40'],
+    general_position_limits = []
+)
+
+FT_SOCCER_RULE_SET = RuleSet(
+    site=FAN_TEAM, 
+    league='SOCCER', 
+    roster_size=ROSTER_SIZE[FAN_TEAM]['SOCCER'],
+    position_limits=POSITIONS[FAN_TEAM]['SOCCER'],
+    salary_max=SALARY_CAP[FAN_TEAM]['SOCCER'],
+    general_position_limits = [],
 )
