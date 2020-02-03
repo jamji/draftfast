@@ -59,10 +59,6 @@ SALARY_CAP = {
         'PGA': 60_000,
     },
     FAN_TEAM: {
-        'NBA_75': 75_000,
-        'NBA_70': 70_000,
-        'NBA_FF_45': 45_000,
-        'NBA_FF_40': 40_000,
         'SOCCER': 100_000,
     }
 }
@@ -442,45 +438,27 @@ DK_MLB_SHOWDOWN_RULE_SET = RuleSet(
     game_type='showdown'
 )
 
-FT_NBA_75_RULE_SET = RuleSet(
-    site=FAN_TEAM, 
-    league='NBA', 
-    roster_size=ROSTER_SIZE[FAN_TEAM]['NBA'], 
-    position_limits=POSITIONS[FAN_TEAM]['NBA'], 
-    salary_max=SALARY_CAP[FAN_TEAM]['NBA_75'],
-    general_position_limits = []
+FT_NBA_RULE_SET = RuleSet(
+    site=FAN_TEAM,
+    league='NBA',
+    roster_size=ROSTER_SIZE[FAN_TEAM]['NBA'],
+    position_limits=POSITIONS[FAN_TEAM]['NBA'],
+    salary_max=0,
+    general_position_limits=[]
 )
 
-FT_NBA_70_RULE_SET = RuleSet(
-    site=FAN_TEAM, 
-    league='NBA', 
-    roster_size=ROSTER_SIZE[FAN_TEAM]['NBA'], 
-    position_limits=POSITIONS[FAN_TEAM]['NBA'], 
-    salary_max=SALARY_CAP[FAN_TEAM]['NBA_70'],
-    general_position_limits = []
-)
-
-FT_NBA_FF_45_RULE_SET = RuleSet(
-    site=FAN_TEAM, 
-    league='NBA', 
-    roster_size=ROSTER_SIZE[FAN_TEAM]['NBA_FF'], 
-    position_limits=POSITIONS[FAN_TEAM]['NBA_FF'], 
-    salary_max=SALARY_CAP[FAN_TEAM]['NBA_FF_45'],
-    general_position_limits = []
-)
-
-FT_NBA_FF_40_RULE_SET = RuleSet(
-    site=FAN_TEAM, 
-    league='NBA', 
-    roster_size=ROSTER_SIZE[FAN_TEAM]['NBA_FF'], 
-    position_limits=POSITIONS[FAN_TEAM]['NBA_FF'], 
-    salary_max=SALARY_CAP[FAN_TEAM]['NBA_FF_40'],
-    general_position_limits = []
+FT_NBA_FF_RULE_SET = RuleSet(
+    site=FAN_TEAM,
+    league='NBA',
+    roster_size=ROSTER_SIZE[FAN_TEAM]['NBA_FF'],
+    position_limits=POSITIONS[FAN_TEAM]['NBA_FF'],
+    salary_max=0,
+    general_position_limits=[]
 )
 
 FT_SOCCER_RULE_SET = RuleSet(
-    site=FAN_TEAM, 
-    league='SOCCER', 
+    site=FAN_TEAM,
+    league='SOCCER',
     roster_size=ROSTER_SIZE[FAN_TEAM]['SOCCER'],
     position_limits=POSITIONS[FAN_TEAM]['SOCCER'],
     salary_max=SALARY_CAP[FAN_TEAM]['SOCCER'],
