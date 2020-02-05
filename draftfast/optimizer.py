@@ -5,7 +5,7 @@ from draftfast.settings import OptimizerSettings
 from draftfast.dke_exceptions import (InvalidBoundsException,
                                       PlayerBanAndLockException)
 from draftfast.orm import Player
-from draftfast.rules import RuleSet
+from draftfast.rules import RuleSet, DRAFT_KINGS
 from draftfast.lineup_constraints import LineupConstraints
 
 
@@ -34,6 +34,7 @@ class Optimizer(object):
         self.general_position_limits = rule_set.general_position_limits
         self.showdown = rule_set.game_type == 'showdown'
         self.single = rule_set.game_type == 'single'
+        self.is_draftkings = rule_set.site == DRAFT_KINGS
         self.settings = settings
         self.lineup_constraints = lineup_constraints
         self.banned_for_exposure = exposure_dict.get('banned', [])
@@ -336,12 +337,15 @@ class Optimizer(object):
             self.solver.Add(self.solver.Sum(players_on_name) <= name_var)
 
     def _set_max_players_per_team(self):
+        max_players_per_team = 4
+        if self.is_draftkings:
+            max_players_per_team = 7
         for team in self.teams:
             if team:
                 if self.single:
                     team_cap = self.solver.Constraint(1, 4)
                 else:
-                    team_cap = self.solver.Constraint(0, 4)
+                    team_cap = self.solver.Constraint(0, max_players_per_team)
                 for i, player in self.enumerated_players:
                     if team == player.team:
                         team_cap.SetCoefficient(self.variables[i], 1)
