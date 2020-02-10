@@ -34,6 +34,7 @@ class Optimizer(object):
         self.general_position_limits = rule_set.general_position_limits
         self.showdown = rule_set.game_type == 'showdown'
         self.single = rule_set.game_type == 'single'
+        self.flex3 = rule_set.game_type == 'flex3'
         self.is_draftkings = rule_set.site == DRAFT_KINGS
         self.settings = settings
         self.lineup_constraints = lineup_constraints
@@ -43,7 +44,7 @@ class Optimizer(object):
         self.name_to_idx_map = {}
         self.variables = []
         self.name_to_idx_map = dict()
-        if self.single:
+        if self.single or self.flex3:
             self.player_to_idx_map = dict()
         else:
             self.player_to_idx_map = defaultdict(list)
@@ -75,7 +76,7 @@ class Optimizer(object):
         self.objective.SetMaximization()
 
     def _add_player_to_idx_maps(self, p: Player, idx: int):
-        if self.single:
+        if self.single or self.flex3:
             self.player_to_idx_map[p.solver_id] = idx
         else:
             self.player_to_idx_map[p.solver_id.split('-')[0]].append(idx)
@@ -115,7 +116,7 @@ class Optimizer(object):
         self._set_max_players_per_team()
         self._set_po_settings()
 
-        if self.single:
+        if self.single or self.flex3:
             self._set_no_duplicate_players()
 
         if self.offensive_positions and self.defensive_positions \
@@ -300,7 +301,7 @@ class Optimizer(object):
                 max_repeats
             )
             for player in roster.sorted_players():
-                if self.single:
+                if self.single or self.flex3:
                     i = self.player_to_idx_map.get(player.solver_id)
                     if i is not None:
                         repeated_players.SetCoefficient(self.variables[i], 1)
@@ -330,7 +331,7 @@ class Optimizer(object):
             )
 
     def _set_no_duplicate_players(self):
-        """Single game, a player will be 4 variable"""
+        """Single game and Flex3, a player will be 4 (3) variable"""
         for name in self.names:
             name_var = self.solver.IntVar(0, 1, name)
             players_on_name = [self.variables[i] for i, p in self.enumerated_players if p.name == name]
@@ -344,6 +345,8 @@ class Optimizer(object):
             if team:
                 if self.single:
                     team_cap = self.solver.Constraint(1, 4)
+                elif self.flex3:
+                    team_cap = self.solver.Constraint(0, 2)
                 else:
                     team_cap = self.solver.Constraint(0, max_players_per_team)
                 for i, player in self.enumerated_players:

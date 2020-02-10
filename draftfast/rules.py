@@ -21,6 +21,7 @@ ROSTER_SIZE = {
         'NFL_MVP': 5,
         'NBA': 9,
         'NBA_SINGLE_GAME': 5,
+        'NBA_FLEX3': 3,
         'MLB': 9,
         'WNBA': 7,
         'NASCAR': 5,
@@ -53,6 +54,7 @@ SALARY_CAP = {
         'NFL_MVP': 60_000,
         'NBA': 60_000,
         'NBA_SINGLE_GAME': 60_000,
+        'NBA_FLEX3': 7,
         'MLB': 35_000,
         'WNBA': 40_000,
         'NASCAR': 50_000,
@@ -162,6 +164,11 @@ POSITIONS = {
             ['PRO', 1, 1],
             ['UTIL', 2, 2],
         ],
+        'NBA_FLEX3': [
+            ['MVP', 1, 1],
+            ['STAR', 1, 1],
+            ['UTIL', 1, 1],
+        ],
         'MLB': [
             ['P', 1, 1],
             ['1B', 1, 2],  # TODO - allow C or 1B
@@ -184,26 +191,26 @@ POSITIONS = {
         ],
     },
     FAN_TEAM: {
-    'NBA': [
-            ['PG', 1, 3],
-            ['SG', 1, 3],
-            ['SF', 1, 3],
-            ['PF', 1, 3],
-            ['C', 1, 3]
-        ],
-    'NBA_FF': [
-            ['PG', 0, 5],
-            ['SG', 0, 5],
-            ['SF', 0, 5],
-            ['PF', 0, 5],
-            ['C', 0, 5]
-        ],
-    'SOCCER': [
-            ['GK', 1, 1],
-            ['D', 1, 5],
-            ['M', 1, 5],
-            ['F', 1, 3],
-    ]
+        'NBA': [
+                ['PG', 1, 3],
+                ['SG', 1, 3],
+                ['SF', 1, 3],
+                ['PF', 1, 3],
+                ['C', 1, 3]
+            ],
+        'NBA_FF': [
+                ['PG', 0, 5],
+                ['SG', 0, 5],
+                ['SF', 0, 5],
+                ['PF', 0, 5],
+                ['C', 0, 5]
+            ],
+        'SOCCER': [
+                ['GK', 1, 1],
+                ['D', 1, 5],
+                ['M', 1, 5],
+                ['F', 1, 3],
+        ]
     }
 }
 
@@ -274,6 +281,16 @@ FD_NBA_SINGLE_GAME_RULE_SET = RuleSet(
     position_limits=POSITIONS[FAN_DUEL]['NBA_SINGLE_GAME'],
     general_position_limits=[],
     game_type='single',
+)
+
+FD_NBA_FLEX3_RULE_SET = RuleSet(
+    site=FAN_DUEL,
+    league='NBA_FLEX3',
+    roster_size=ROSTER_SIZE[FAN_DUEL]['NBA_FLEX3'],
+    salary_max=SALARY_CAP[FAN_DUEL]['NBA_FLEX3'],
+    position_limits=POSITIONS[FAN_DUEL]['NBA_FLEX3'],
+    general_position_limits=[],
+    game_type='flex3',
 )
 
 DK_WNBA_RULE_SET = RuleSet(

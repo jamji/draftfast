@@ -121,6 +121,18 @@ class SingleGameRoster(Roster):
         return position_order[player.pos]
 
 
+class Flex3Roster(Roster):
+    POSITION_ORDER = {
+        'MVP': 0,
+        'STAR': 1,
+        'UTIL': 2,
+    }
+
+    def position_order(self, player):
+        position_order = getattr(self, 'POSITION_ORDER')
+        return position_order[player.pos]
+
+
 class NFLRoster(Roster):
     POSITION_ORDER = {
         'QB': 0,
@@ -238,6 +250,7 @@ class RosterSelect:
             'NBA': NBARoster(),
             'NBA_SHOWDOWN': ShowdownRoster(),
             'NBA_SINGLE_GAME': SingleGameRoster(),
+            'NBA_FLEX3': Flex3Roster(),
             'WNBA': WNBARoster(),
             'NFL': NFLRoster(),
             'NFL_SHOWDOWN': ShowdownRoster(),
