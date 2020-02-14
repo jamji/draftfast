@@ -36,6 +36,7 @@ class Optimizer(object):
         self.single = rule_set.game_type == 'single'
         self.flex3 = rule_set.game_type == 'flex3'
         self.is_draftkings = rule_set.site == DRAFT_KINGS
+        self.flexy_five = rule_set.game_type == 'flexy_five'
         self.settings = settings
         self.lineup_constraints = lineup_constraints
         self.banned_for_exposure = exposure_dict.get('banned', [])
@@ -112,8 +113,9 @@ class Optimizer(object):
         self._set_stack()
         self._set_combo()
         self._set_no_duplicate_lineups()
-        self._set_min_teams()
-        self._set_max_players_per_team()
+        if not self.flexy_five:
+            self._set_min_teams()
+            self._set_max_players_per_team()
         self._set_po_settings()
 
         if self.single or self.flex3:

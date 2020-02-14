@@ -470,7 +470,8 @@ FT_NBA_FF_RULE_SET = RuleSet(
     roster_size=ROSTER_SIZE[FAN_TEAM]['NBA_FF'],
     position_limits=POSITIONS[FAN_TEAM]['NBA_FF'],
     salary_max=0,
-    general_position_limits=[]
+    general_position_limits=[],
+    game_type='flexy_five',
 )
 
 FT_SOCCER_RULE_SET = RuleSet(
