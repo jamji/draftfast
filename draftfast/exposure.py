@@ -2,7 +2,10 @@ import math
 import csv
 import operator
 import random
-from collections import OrderedDict
+from collections import OrderedDict, defaultdict
+
+from draftfast.rules import FT_NBA_RULE_SET, FD_NBA_RULE_SET, DK_NBA_RULE_SET, FT_NBA_FF_RULE_SET, \
+    FD_NBA_SINGLE_GAME_RULE_SET, FD_NBA_FLEX3_RULE_SET
 from terminaltables import AsciiTable
 import numpy as np
 
@@ -14,6 +17,19 @@ MAX_FD_LOCKED_POSITIONS = {
     'SF': 2,
     'PF': 2,
     'C': 1,
+}
+
+MAX_FD_SINGLE_LOCKED_POSITIONS = {
+    'MVP': 1,
+    'STAR': 1,
+    'PRO': 1,
+    'UTIL': 2,
+}
+
+MAX_FD_FLEX3_LOCKED_POSITIONS = {
+    'MVP': 1,
+    'STAR': 1,
+    'UTIL': 1,
 }
 
 
@@ -45,64 +61,106 @@ def parse_exposure_file(file_location):
 
 
 def get_exposure_args(existing_rosters, exposure_bounds, n, use_random,
-                      random_seed, locked_pos, constraints) -> dict:
+                      random_seed, locked_pos, constraints, rule_set, locked) -> dict:
     exposures = {}
     for r in existing_rosters:
         for p in r.players:
             exposures[p.name] = exposures.get(p.name, 0) + 1
 
     if use_random:
-        return get_exposure_args_random(exposures, exposure_bounds, n,
-                                        random_seed)
+        return get_exposure_args_random(exposures, exposure_bounds, n, random_seed)
 
-    return get_exposure_args_deterministic(exposures, existing_rosters,
-                                           exposure_bounds, locked_pos, constraints)
+    return get_exposure_args_deterministic(exposures, n, exposure_bounds, locked_pos, constraints, rule_set, locked)
 
 
-def get_exposure_args_deterministic(exposures, existing_rosters,
-                                    exposure_bounds, locked_pos, constraints) -> dict:
+def get_exposure_args_deterministic(exposures, n, exposure_bounds, locked_pos, constraints, rule_set, locked_names) -> dict:
     banned = []
     locked = []
+
+    current_lineup_locked_pos = defaultdict(int)
 
     exposure_bounds.sort(key=operator.itemgetter('proj'), reverse=True)
 
     for bound in exposure_bounds:
         name = bound['name']
 
-        total = float(len(existing_rosters) + 1)
+        total = n
         min_lines = bound['min'] * total
         max_lines = math.floor(bound['max'] * total) or 1
         lineups = exposures.get(name, 0)
 
         if lineups < min_lines:
-            if type(bound['position']) is str and\
-                    locked_pos[bound['position']] < MAX_FD_LOCKED_POSITIONS[bound['position']] and\
-                    not constraints.is_banned(name):
-                locked_pos[bound['position']] += 1
+            if rule_set == FD_NBA_RULE_SET and\
+                    (locked_pos[bound['position']] + current_lineup_locked_pos[bound['position']]) < MAX_FD_LOCKED_POSITIONS[bound['position']] and\
+                    not constraints.is_banned(name) and\
+                    name not in locked:
+                current_lineup_locked_pos[bound['position']] += 1
                 locked.append(name)
-            if type(bound['position']) is list:
+
+            if rule_set == FD_NBA_SINGLE_GAME_RULE_SET and\
+                    (len(locked_names) + len(locked)) < 5 and\
+                    not constraints.is_banned(name) and\
+                    name not in locked:
+                locked.append(name)
+
+            if rule_set == FD_NBA_FLEX3_RULE_SET and \
+                    (len(locked_names) + len(locked)) < 3 and \
+                    not constraints.is_banned(name) and\
+                    name not in locked:
+                locked.append(name)
+
+            if rule_set == DK_NBA_RULE_SET:
                 for pos in bound['position']:
-                    if sum(locked_pos.values()) >= 8:
+                    if sum(locked_pos.values()) + sum(current_lineup_locked_pos.values()) >= 8:
                         break
-                    if pos == 'PG' and locked_pos['PG'] < 3 and locked_pos['PG'] + locked_pos['SG'] < 4 and\
-                            not constraints.is_banned(name):
-                        locked_pos['PG'] += 1
+                    if pos == 'PG' and\
+                            locked_pos['PG'] + current_lineup_locked_pos['PG'] < 3 and\
+                            locked_pos['PG'] + locked_pos['SG'] + current_lineup_locked_pos['PG'] + current_lineup_locked_pos['SG'] < 4 and\
+                            not constraints.is_banned(name) and\
+                            name not in locked:
+                        current_lineup_locked_pos['PG'] += 1
                         locked.append(name)
-                    elif pos == 'SG' and locked_pos['SG'] < 3 and locked_pos['PG'] + locked_pos['SG'] < 4 and\
-                            not constraints.is_banned(name):
-                        locked_pos['SG'] += 1
+                    elif pos == 'SG' and\
+                            locked_pos['SG'] + current_lineup_locked_pos['SG'] < 3 and\
+                            locked_pos['PG'] + locked_pos['SG'] + current_lineup_locked_pos['PG'] + current_lineup_locked_pos['SG'] < 4 and\
+                            not constraints.is_banned(name) and\
+                            name not in locked:
+                        current_lineup_locked_pos['SG'] += 1
                         locked.append(name)
-                    elif pos == 'SF' and locked_pos['SF'] < 3 and locked_pos['SF'] + locked_pos['PF'] < 4 and\
-                            not constraints.is_banned(name):
-                        locked_pos['SF'] += 1
+                    elif pos == 'SF' and\
+                            locked_pos['SF'] + current_lineup_locked_pos['SF'] < 3 and\
+                            locked_pos['SF'] + locked_pos['PF'] + current_lineup_locked_pos['SF'] + current_lineup_locked_pos['PF'] < 4 and\
+                            not constraints.is_banned(name) and\
+                            name not in locked:
+                        current_lineup_locked_pos['SF'] += 1
                         locked.append(name)
-                    elif pos == 'PF' and locked_pos['PF'] < 3 and locked_pos['SF'] + locked_pos['PF'] < 4 and\
-                            not constraints.is_banned(name):
-                        locked_pos['PF'] += 1
+                    elif pos == 'PF' and\
+                            locked_pos['PF'] + current_lineup_locked_pos['PF'] < 3 and\
+                            locked_pos['SF'] + locked_pos['PF'] + current_lineup_locked_pos['SF'] + current_lineup_locked_pos['PF'] < 4 and\
+                            not constraints.is_banned(name) and\
+                            name not in locked:
+                        current_lineup_locked_pos['PF'] += 1
                         locked.append(name)
-                    elif pos == 'C' and locked_pos['C'] < 2 and not constraints.is_banned(name):
-                        locked_pos['C'] += 1
+                    elif pos == 'C' and\
+                            locked_pos['C'] + current_lineup_locked_pos['C'] < 2 and\
+                            not constraints.is_banned(name) and\
+                            name not in locked:
+                        current_lineup_locked_pos['C'] += 1
                         locked.append(name)
+
+            if rule_set == FT_NBA_RULE_SET and\
+                    (locked_pos[bound['position']] + current_lineup_locked_pos[bound['position']]) < 3 and\
+                    not constraints.is_banned(name) and\
+                    name not in locked:
+                current_lineup_locked_pos[bound['position']] += 1
+                locked.append(name)
+
+            if rule_set == FT_NBA_FF_RULE_SET and\
+                    (locked_pos[bound['position']] + current_lineup_locked_pos[bound['position']]) < 5 and\
+                    not constraints.is_banned(name) and\
+                    name not in locked:
+                current_lineup_locked_pos[bound['position']] += 1
+                locked.append(name)
         elif lineups >= max_lines and not constraints.is_locked(name):
             banned.append(name)
 
