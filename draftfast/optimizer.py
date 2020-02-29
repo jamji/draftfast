@@ -51,6 +51,7 @@ class Optimizer(object):
             self.player_to_idx_map = defaultdict(list)
 
         locked_names = []  # used for FD Single and FLEX3
+        locked_positions = []
         for idx, player in self.enumerated_players:
             self.variables.append(
                 self.solver.IntVar(0, 1, player.solver_id)
@@ -60,9 +61,10 @@ class Optimizer(object):
 
             if self._is_locked(player):
                 if self.single or self.flex3:
-                    if player.name not in locked_names:
+                    if player.name not in locked_names and player.pos not in locked_positions:
                         player.lock = True
                         locked_names.append(player.name)
+                        locked_positions.append(player.pos)
                 else:
                     player.lock = True
             if self._is_banned(player):
