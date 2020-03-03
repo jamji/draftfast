@@ -16,7 +16,8 @@ class Optimizer(object):
         rule_set: RuleSet,
         settings: OptimizerSettings,
         lineup_constraints: LineupConstraints,
-        exposure_dict: dict
+        exposure_dict: dict,
+        lowest_salary: int,
     ):
         self.solver = pywraplp.Solver(
             'FD',
@@ -40,7 +41,7 @@ class Optimizer(object):
         self.settings = settings
         self.lineup_constraints = lineup_constraints
         self.banned_for_exposure = exposure_dict.get('banned', [])
-        self.locked_for_exposure = exposure_dict.get('locked', [])
+        self.locked_for_exposure = exposure_dict.get('locked', [])[:1]
 
         self.name_to_idx_map = {}
         self.variables = []
@@ -49,6 +50,8 @@ class Optimizer(object):
             self.player_to_idx_map = dict()
         else:
             self.player_to_idx_map = defaultdict(list)
+
+        locked_salary = []  # Min% or locked, for all rule set type
 
         locked_names = []  # used for FD Single and FLEX3
         locked_positions = []
@@ -60,13 +63,16 @@ class Optimizer(object):
             self._add_player_to_idx_maps(player, idx)
 
             if self._is_locked(player):
-                if self.single or self.flex3:
-                    if player.name not in locked_names and player.pos not in locked_positions:
+                if rule_set.salary_max - (sum(locked_salary) + player.cost) > lowest_salary:
+                    if self.single or self.flex3:
+                        if player.name not in locked_names and player.pos not in locked_positions:
+                            locked_salary.append(player.cost)
+                            player.lock = True
+                            locked_names.append(player.name)
+                            locked_positions.append(player.pos)
+                    else:
+                        locked_salary.append(player.cost)
                         player.lock = True
-                        locked_names.append(player.name)
-                        locked_positions.append(player.pos)
-                else:
-                    player.lock = True
             if self._is_banned(player):
                 player.ban = True
             if self._is_position_locked(player):

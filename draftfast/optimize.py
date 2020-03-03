@@ -18,7 +18,8 @@ def run(rule_set: RuleSet,
         player_settings: PlayerPoolSettings = PlayerPoolSettings(),
         exposure_dict: dict = dict(),
         roster_gen: Roster = None,
-        verbose=False) -> Roster:
+        verbose=False,
+        lowest_salary=None) -> Roster:
     players = pool.filter_pool(
         deepcopy(player_pool),
         player_settings,
@@ -40,6 +41,7 @@ def run(rule_set: RuleSet,
         settings=optimizer_settings,
         lineup_constraints=constraints,
         exposure_dict=exposure_dict,
+        lowest_salary=lowest_salary,
     )
 
     variables = optimizer.variables
@@ -102,6 +104,7 @@ def run_multi(
     progress_recorder=None,
     locked_pos=None,
     locked=None,
+    lowest_salary=None,
 ) -> [List[Roster], list]:
 
     if not isinstance(rule_set, RuleSet):
@@ -133,6 +136,7 @@ def run_multi(
             exposure_dict=exposure_dict,
             constraints=constraints,
             verbose=verbose,
+            lowest_salary=lowest_salary,
         )
         if roster:
             optimizer_settings.existing_rosters += [roster]
